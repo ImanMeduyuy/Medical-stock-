@@ -1,9 +1,10 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Importation du package Firestore
+import 'package:stock_medical/models/product_supplier.dart';
+import 'package:stock_medical/products/product_screen.dart';
 import 'package:stock_medical/suppliers/supplier_screen.dart';
 
 class AddProduct extends StatefulWidget {
@@ -31,6 +32,7 @@ class _AddProductState extends State<AddProduct> {
   final pnameController = TextEditingController();
   final qtyController = TextEditingController();
   final selpriceController = TextEditingController();
+  final supplierController = TextEditingController();
   final mfgdateController = TextEditingController();
   final expdateController = TextEditingController();
   final pdescController = TextEditingController();
@@ -61,46 +63,98 @@ class _AddProductState extends State<AddProduct> {
     minqtyController.clear();
   }
 
-  void getfromData() {
+  void getFromData() {
     barcode = barcodeController.text;
     productname = pnameController.text;
     selprice = double.tryParse(selpriceController.text) ?? 0.0;
     qty = int.tryParse(qtyController.text) ?? 1;
     mfgdate = mfgdateController.text;
     expdate = DateTime.tryParse(expdateController.text);
-if (expdate == null) {
-  // Gérer le cas où la conversion échoue, par exemple afficher un message d'erreur
-  print('Failed to parse expiration date');
-  return; // ou une autre action appropriée
-}
+    if (expdate == null) {
+      // Gérer le cas où la conversion échoue, par exemple afficher un message d'erreur
+      print('Failed to parse expiration date');
+      return; // ou une autre action appropriée
+    }
 
     pdesc = pdescController.text;
     minqty = int.tryParse(minqtyController.text) ?? 1;
   }
 
+  // Méthode pour ajouter les données du produit à Firebase Firestore
+  void addProductToFirestore() async {
+    try {
+      await FirebaseFirestore.instance.collection('products').add({
+        'barcode': barcode,
+        'productname': productname,
+        'qty': qty,
+        'selprice': selprice,
+        'supplierName': supplierName,
+        'mfgdate': mfgdate,
+        'expdate': expdate,
+        'pdesc': pdesc,
+        'minqty': minqty,
+      });
+      print('Product added to Firestore');
+    } catch (e) {
+      print('Error adding product to Firestore: $e');
+    }
+  }
+
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text('Add Product'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
+    appBar: AppBar(
+        title: Text(
+          "Add New Product",
+           style: TextStyle(color: Colors.white)),
+        
+        backgroundColor: Colors.indigoAccent,
+        iconTheme: IconThemeData(color: Colors.white), 
+         actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              // Votre logique de validation et ajout du fournisseur ici
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+             clearText();
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.done),
+             onPressed: () {
           if (_formKey.currentState!.validate()) {
             setState(() {
-              getfromData();
-              // Ajouter le produit à la base de données
-              // addUser();
-              // Afficher la boîte de dialogue
-              _displayDialog(context);
+              getFromData();
+              addProductToFirestore();
               clearText();
+              ProductScreen();
             });
           }
         },
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.check),
+          ),
+        ],
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     if (_formKey.currentState!.validate()) {
+      //       setState(() {
+      //         getFromData();
+      //         addProductToFirestore(); // Ajouter le produit à Firestore
+      //         _displayDialog(context);
+      //         clearText();
+      //       });
+      //     }
+      //   },
+      //   backgroundColor: Colors.blue,
+      //   child: const Icon(Icons.check),
+      // ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -219,7 +273,7 @@ if (expdate == null) {
                     SizedBox(height: 10.0),
                     TextFormField(
                       onTap: () async {
-                        var selectedSupplier = await Navigator.push(
+                        SupplierData? selectedSupplier = await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => SupplierScreen(),
@@ -227,9 +281,9 @@ if (expdate == null) {
                         );
                         if (selectedSupplier != null) {
                           setState(() {
-                           supplierName = selectedSupplier.name;
-                           supplierId = selectedSupplier.id;
-                           pnameController.text = supplierName; // Mettre à jour l'ID du fournisseur
+                            supplierName = selectedSupplier.name;
+                            supplierId = selectedSupplier.id;
+                            supplierController.text = supplierName; // Mettre à jour le contrôleur du champ de texte du fournisseur
                           });
                         }
                       },
@@ -239,7 +293,7 @@ if (expdate == null) {
                           Icons.supervisor_account,
                           color: Colors.black,
                         ),
-                        labelText: 'Supplier',
+                        labelText: 'Fournisseur',
                         labelStyle: TextStyle(
                           fontFamily: 'Montserrat',
                           fontWeight: FontWeight.bold,
@@ -252,89 +306,78 @@ if (expdate == null) {
                     ),
                     SizedBox(height: 10.0),
                     TextFormField(
-                        controller: mfgdateController,
+                      controller: mfgdateController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please Enter Mfg. Date';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                          icon:
+                              Icon(Icons.calendar_today), //icon of text field
+                          labelText: "Mfg. Date" //label text of field
+                          ),
+                      readOnly: true,
+                      onTap: () async {
+                        var pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(
+                                2000), //DateTime.now() - not to allow to choose before today.
+                            lastDate: DateTime(2101));
 
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please Enter Mfg. Date';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                            icon:
-                                Icon(Icons.calendar_today), //icon of text field
-                            labelText: "Mfg. Date" //label text of field
-                            ),
-                        readOnly:
-                            true, //set it true, so that user will not able to edit text
-                        onTap: () async {
-                          var pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(
-                                  2000), //DateTime.now() - not to allow to choose before today.
-                              lastDate: DateTime(2101));
+                        if (pickedDate != null) {
+                          print(pickedDate);
+                          String formattedDate =
+                              DateFormat('yyyy-MM-dd').format(pickedDate);
+                          print(formattedDate);
 
-                          if (pickedDate != null) {
-                            print(
-                                pickedDate); //pickedDate output format => 2021-03-10 00:00:00.000
-                            String formattedDate =
-                                DateFormat('yyyy-MM-dd').format(pickedDate);
-                            print(
-                                formattedDate); //formatted date output using intl package =>  2021-03-16
-                            //you can implement different kind of Date Format here according to your requirement
+                          setState(() {
+                            mfgdateController.text = formattedDate;
+                          });
+                        } else {
+                          print("Date is not selected");
+                        }
+                      },
+                    ),
+                    SizedBox(height: 10.0),
+                    TextFormField(
+                      controller: expdateController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please Enter Exp. Date';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                          icon:
+                              Icon(Icons.calendar_today), //icon of text field
+                          labelText: "Exp. Date" //label text of field
+                          ),
+                      readOnly: true,
+                      onTap: () async {
+                        var pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(
+                                2000), //DateTime.now() - not to allow to choose before today.
+                            lastDate: DateTime(2101));
 
-                            setState(() {
-                              mfgdateController.text =
-                                  formattedDate; //set output date to TextField value.
-                            });
-                          } else {
-                            print("Date is not selected");
-                          }
-                        },
-                      ),
-                      SizedBox(height: 10.0),
-                      TextFormField(
-                        // controller: dateinput,
-                        controller:
-                            expdateController, //editing controller of this TextField
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please Enter Exp. Date';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                            icon:
-                                Icon(Icons.calendar_today), //icon of text field
-                            labelText: "Exp. Date" //label text of field
-                            ),
-                        readOnly:
-                            true, //set it true, so that user will not able to edit text
-                        onTap: () async {
-                          var pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(
-                                  2000), //DateTime.now() - not to allow to choose before today.
-                              lastDate: DateTime(2101));
+                        if (pickedDate != null) {
+                          print(pickedDate);
+                          String formattedDate =
+                              DateFormat('yyyy-MM-dd').format(pickedDate);
+                          print(formattedDate);
 
-                          if (pickedDate != null) {
-                            print(
-                                pickedDate); //pickedDate output format => 2021-03-10 00:00:00.000
-                            String formattedDate =
-                                DateFormat('yyyy-MM-dd').format(pickedDate);
-                            print(formattedDate);
-
-                            setState(() {
-                              expdateController.text =
-                                  formattedDate; //set output date to TextField value.
-                            });
-                          } else {
-                            print("Date is not selected");
-                          }
-                        },
-                      ),
+                          setState(() {
+                            expdateController.text = formattedDate;
+                          });
+                        } else {
+                          print("Date is not selected");
+                        }
+                      },
+                    ),
                     SizedBox(height: 20.0),
                     TextFormField(
                       controller: pdescController,
@@ -410,6 +453,7 @@ if (expdate == null) {
       ),
     );
   }
+  
 
   Future<void> scanBarcodeNormal() async {
     String barcodeScanRes;

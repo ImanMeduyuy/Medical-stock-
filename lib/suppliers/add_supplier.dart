@@ -68,7 +68,7 @@ class _AddSupplierState extends State<AddSupplier> {
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: () {
-              // Votre logique de validation et ajout du fournisseur ici
+             clearText();
             },
           ),
           IconButton(

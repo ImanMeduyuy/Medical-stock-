@@ -1,5 +1,8 @@
+// ignore_for_file: prefer_const_constructors, sort_child_properties_last, prefer_const_constructors_in_immutables, library_private_types_in_public_api
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:stock_medical/models/product_supplier.dart';
 import 'package:stock_medical/suppliers/add_supplier.dart';
 import 'package:stock_medical/suppliers/update_suppliers.dart';
 
@@ -97,8 +100,11 @@ class _SupplierScreenState extends State<SupplierScreen> {
                       title: Text(supplierData['name']),
                       subtitle: Text(supplierData['email']),
                       onTap: () {
-                        // Retourner le nom du fournisseur sélectionné à la page précédente
-                        Navigator.pop(context, supplierData['name']);
+                        SupplierData selectedSupplier = SupplierData(
+                          id: supplier.id,
+                          name: supplierData['name'],
+                        );
+                        Navigator.pop(context, selectedSupplier);
                       },
                       trailing: PopupMenuButton(
                         icon: Icon(Icons.more_horiz_outlined),
