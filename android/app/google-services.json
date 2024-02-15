@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "766390593774",
+    "project_id": "stock-medicale-2024",
+    "storage_bucket": "stock-medicale-2024.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:766390593774:android:a6a02cdc29d5ced779abff",
+        "android_client_info": {
+          "package_name": "com.example.medicalstock"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbkS6gSi28m3mizdgcn465cnq9c5SeNs0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:766390593774:android:64ddf0c1a33876ac79abff",
+        "android_client_info": {
+          "package_name": "com.example.stock_medical"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbkS6gSi28m3mizdgcn465cnq9c5SeNs0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
