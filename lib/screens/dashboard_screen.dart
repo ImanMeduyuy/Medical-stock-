@@ -22,7 +22,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
        body:  SingleChildScrollView(
+        
          child: Column(
+          
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
@@ -31,6 +33,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 ),
               ),
+              SizedBox(height: 10.0,),
               Padding(
                 padding: const EdgeInsets.all(5.0),
                 child: Center(

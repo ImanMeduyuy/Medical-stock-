@@ -42,9 +42,9 @@ class _AddSupplierState extends State<AddSupplier> {
 
   Future<void> addSupplier() {
     return suppliers
-        .add({'name': name, 'email': email, 'mobile': mobile})
-        .then((value) {
-      Navigator.pop(context); // Retourne à la page précédente (liste des fournisseurs)
+        .add({'name': name, 'email': email, 'mobile': mobile}).then((value) {
+      Navigator.pop(
+          context); // Retourne à la page précédente (liste des fournisseurs)
     }).catchError((error) => print('Failed to Add Supplier: $error'));
   }
 
@@ -52,13 +52,10 @@ class _AddSupplierState extends State<AddSupplier> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Add New Supplier",
-           style: TextStyle(color: Colors.white)),
-        
-        backgroundColor: Colors.indigoAccent,
-        iconTheme: IconThemeData(color: Colors.white), 
-         actions: [
+        title: Text("Add New Supplier", style: TextStyle(color: Colors.white)),
+        backgroundColor: Color.fromARGB(255, 100, 98, 224),
+        iconTheme: IconThemeData(color: Colors.white),
+        actions: [
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
@@ -68,7 +65,7 @@ class _AddSupplierState extends State<AddSupplier> {
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: () {
-             clearText();
+              // Votre logique de validation et ajout du fournisseur ici
             },
           ),
           IconButton(
@@ -95,11 +92,20 @@ class _AddSupplierState extends State<AddSupplier> {
                 child: TextFormField(
                   autofocus: false,
                   decoration: InputDecoration(
-                    labelText: 'Name: ',
-                    labelStyle: TextStyle(fontSize: 20.0),
-                    border: OutlineInputBorder(),
-                    errorStyle:
-                        TextStyle(color: Colors.redAccent, fontSize: 15),
+                    labelText: 'Supplier',
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 244, 244, 248),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Color.fromARGB(255, 141, 189, 243),
+                          width: 2.0),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
                   ),
                   controller: nameController,
                   validator: (value) {
@@ -115,11 +121,20 @@ class _AddSupplierState extends State<AddSupplier> {
                 child: TextFormField(
                   autofocus: false,
                   decoration: InputDecoration(
-                    labelText: 'Email: ',
-                    labelStyle: TextStyle(fontSize: 20.0),
-                    border: OutlineInputBorder(),
-                    errorStyle:
-                        TextStyle(color: Colors.redAccent, fontSize: 15),
+                    labelText: 'Email',
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 244, 244, 248),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Color.fromARGB(255, 141, 189, 243),
+                          width: 2.0),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
                   ),
                   controller: emailController,
                   validator: (value) {
@@ -136,13 +151,23 @@ class _AddSupplierState extends State<AddSupplier> {
                 margin: EdgeInsets.symmetric(vertical: 10.0),
                 child: TextFormField(
                   autofocus: false,
-                  keyboardType: TextInputType.number, // Affiche le clavier numérique
+                  keyboardType:
+                      TextInputType.number, // Affiche le clavier numérique
                   decoration: InputDecoration(
-                    labelText: 'Mobile: ',
-                    labelStyle: TextStyle(fontSize: 20.0),
-                    border: OutlineInputBorder(),
-                    errorStyle:
-                        TextStyle(color: Colors.redAccent, fontSize: 15),
+                    labelText: 'Telephone',
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 244, 244, 248),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Color.fromARGB(255, 141, 189, 243),
+                          width: 2.0),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
                   ),
                   controller: mobileController,
                   validator: (value) {
@@ -153,11 +178,11 @@ class _AddSupplierState extends State<AddSupplier> {
                   },
                 ),
               ),
-
             ],
           ),
         ),
       ),
     );
+
   }
 }

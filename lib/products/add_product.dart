@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -22,6 +24,7 @@ class _AddProductState extends State<AddProduct> {
   var productname = "";
   int qty = 1;
   double selprice = 0.0;
+  var paysfabicat = "";
   var supplierName = "";
   var mfgdate = "";
   DateTime? expdate;
@@ -32,6 +35,7 @@ class _AddProductState extends State<AddProduct> {
   final pnameController = TextEditingController();
   final qtyController = TextEditingController();
   final selpriceController = TextEditingController();
+  final paysfabicatController = TextEditingController();
   final supplierController = TextEditingController();
   final mfgdateController = TextEditingController();
   final expdateController = TextEditingController();
@@ -45,6 +49,8 @@ class _AddProductState extends State<AddProduct> {
     pnameController.dispose();
     qtyController.dispose();
     selpriceController.dispose();
+    paysfabicatController.dispose();
+    supplierController.dispose();
     mfgdateController.dispose();
     expdateController.dispose();
     pdescController.dispose();
@@ -57,6 +63,8 @@ class _AddProductState extends State<AddProduct> {
     pnameController.clear();
     qtyController.clear();
     selpriceController.clear();
+    paysfabicatController.clear();
+    supplierController.clear();
     mfgdateController.clear();
     expdateController.clear();
     pdescController.clear();
@@ -67,6 +75,8 @@ class _AddProductState extends State<AddProduct> {
     barcode = barcodeController.text;
     productname = pnameController.text;
     selprice = double.tryParse(selpriceController.text) ?? 0.0;
+    paysfabicat = paysfabicatController.text;
+    supplierName = supplierController.text;
     qty = int.tryParse(qtyController.text) ?? 1;
     mfgdate = mfgdateController.text;
     expdate = DateTime.tryParse(expdateController.text);
@@ -82,25 +92,40 @@ class _AddProductState extends State<AddProduct> {
 
   // Méthode pour ajouter les données du produit à Firebase Firestore
   void addProductToFirestore() async {
-    try {
-      await FirebaseFirestore.instance.collection('products').add({
-        'barcode': barcode,
-        'productname': productname,
-        'qty': qty,
-        'selprice': selprice,
-        'supplierName': supplierName,
-        'mfgdate': mfgdate,
-        'expdate': expdate,
-        'pdesc': pdesc,
-        'minqty': minqty,
-      });
-      print('Product added to Firestore');
-    } catch (e) {
-      print('Error adding product to Firestore: $e');
-    }
-  }
+  try {
+    DocumentReference productRef = await FirebaseFirestore.instance.collection('products').add({
+      'barcode': barcode,
+      'productname': productname,
+      'qty': qty,
+      'selprice': selprice,
+      'paysfabrication': paysfabicat,
+      'supplierName': supplierName,
+      'mfgdate': mfgdate,
+      'expdate': expdate,
+      'pdesc': pdesc,
+      'minqty': minqty,
+    });
+    print('Product added to Firestore');
 
-  
+    // Obtenez l'ID du produit ajouté à partir de la référence
+    String productId = productRef.id;
+
+    // Enregistrez également l'historique du produit
+    await FirebaseFirestore.instance.collection('product_history').add({
+      'productId': productId,
+      'action': 'add',
+      'date_add': DateTime.now(),
+      // Ajoutez d'autres détails d'historique si nécessaire
+    });
+
+    // Effacez les champs de saisie après l'ajout réussi du produit
+    clearText();
+  } catch (e) {
+    print('Error adding product to Firestore: $e');
+  }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +200,7 @@ class _AddProductState extends State<AddProduct> {
                       },
                       decoration: InputDecoration(
                         icon: Icon(
-                          Icons.scanner,
+                          Icons.barcode_reader,
                           color: Colors.black,
                         ),
                         labelText: 'Barcode',
@@ -260,6 +285,32 @@ class _AddProductState extends State<AddProduct> {
                           color: Colors.black,
                         ),
                         labelText: 'Sell Price',
+                        labelStyle: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blueAccent),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                      TextFormField(
+                      controller: paysfabicatController,
+                      keyboardType: TextInputType.text,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please Enter Sell Price';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        icon: Icon(
+                          Icons.list,
+                          color: Colors.black,
+                        ),
+                        labelText: 'pays',
                         labelStyle: TextStyle(
                           fontFamily: 'Montserrat',
                           fontWeight: FontWeight.bold,

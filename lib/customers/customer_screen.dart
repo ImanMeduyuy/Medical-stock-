@@ -1,7 +1,5 @@
-// ignore_for_file: prefer_const_constructors_in_immutables, prefer_const_constructors, avoid_print, sort_child_properties_last, library_private_types_in_public_api
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stock_medical/customers/add_customer.dart';
 import 'package:stock_medical/customers/update_customer.dart';
 
@@ -16,16 +14,15 @@ class _CustomerScreenState extends State<CustomerScreen> {
   final Stream<QuerySnapshot> customersStream =
       FirebaseFirestore.instance.collection('customers').snapshots();
 
-  // For Deleting User
   CollectionReference customers =
       FirebaseFirestore.instance.collection('customers');
+
   Future<void> deleteUser(id) {
-    // print("User Deleted $id");
     return customers
         .doc(id)
         .delete()
-        .then((value) => print('customer Deleted'))
-        .catchError((error) => print('Failed to Delete customer: $error'));
+        .then((value) => print('Customer Deleted'))
+        .catchError((error) => print('Failed to Delete Customer: $error'));
   }
 
   @override
@@ -33,32 +30,31 @@ class _CustomerScreenState extends State<CustomerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Fournisseurs",
+          "Clients",
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.indigoAccent.shade200,
-         iconTheme: IconThemeData(color: Colors.white), 
-         actions: [
+        iconTheme: IconThemeData(color: Colors.white), 
+        actions: [
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              // Votre logique de validation et ajout du fournisseur ici
+              // Votre logique de recherche de client ici
             },
           ),
-           IconButton(
+          IconButton(
             icon: Icon(Icons.sort),
             onPressed: () {
-              // Votre logique de validation et ajout du fournisseur ici
+              // Votre logique de tri des clients ici
             },
           ),
-           IconButton(
+          IconButton(
             icon: Icon(Icons.more_vert),
             onPressed: () {
-              // Votre logique de validation et ajout du fournisseur ici
+              // Votre logique supplémentaire ici
             },
           ),
-           
-         ]
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: customersStream,
@@ -72,59 +68,79 @@ class _CustomerScreenState extends State<CustomerScreen> {
             );
           }
 
-          final List storedocs = [];
-          snapshot.data!.docs.map((DocumentSnapshot document) {
-            Map a = document.data() as Map<String, dynamic>;
-            storedocs.add(a);
-            a['id'] = document.id;
-          }).toList();
+          final List<DocumentSnapshot> customersList = snapshot.data!.docs;
 
-          return ListView.builder(
-            itemCount: storedocs.length,
-            itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                leading: Icon(Icons.person_3_rounded),
-                title: Text(storedocs[index]['name']),
-                subtitle: Text(storedocs[index]['email']),
-                trailing: PopupMenuButton(
-                  icon: Icon(Icons.more_horiz_outlined),
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem(
-                        child: Text("Edit"),
-                        value: "edit",
+          return Column(
+            children: [
+              SizedBox(
+                height: 20, // Hauteur du sous-appbar
+                child: AppBar(
+                  title: Text(
+                    'Nbre de clients: ${customersList.length}',
+                    style: TextStyle(color: Colors.white, fontSize: 15),
+                  ),
+                  backgroundColor: Colors.indigoAccent.shade100,
+                  automaticallyImplyLeading: false,
+                ),
+              ),
+              SizedBox(height: 20),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: customersList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final DocumentSnapshot customer = customersList[index];
+                    final Map<String, dynamic> customerData =
+                        customer.data() as Map<String, dynamic>;
+
+                    return ListTile(
+                      leading: Icon(Icons.person_3_rounded),
+                      title: Text(customerData['name']),
+                      subtitle: Text(customerData['email']),
+                      onTap: () {
+                        // Logic to handle customer tap
+                      },
+                      trailing: PopupMenuButton(
+                        icon: Icon(Icons.more_horiz_outlined),
+                        itemBuilder: (BuildContext context) {
+                          return [
+                            PopupMenuItem(
+                              child: Text("Edit"),
+                              value: "edit",
+                            ),
+                            PopupMenuItem(
+                              child: Text("Delete"),
+                              value: "delete",
+                            ),
+                            PopupMenuItem(
+                              child: Text("Historique"),
+                              value: "",
+                            ),
+                          ];
+                        },
+                        onSelected: (value) {
+                          if (value == "edit") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => UpdateCustomer(
+                                  id: customer.id,
+                                ),
+                              ),
+                            );
+                          } else if (value == "delete") {
+                            deleteUser(customer.id);
+                          }
+                        },
                       ),
-                      PopupMenuItem(
-                        child: Text("Delete"),
-                        value: "delete",
-                      ),
-                       PopupMenuItem(
-                        child: Text("historique"),
-                        value: "",
-                      ),
-                    ];
-                  },
-                  onSelected: (value) {
-                    if (value == "edit") {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UpdateCustomer(
-                            id: storedocs[index]['id'],
-                          ),
-                        ),
-                      );
-                    } else if (value == "delete") {
-                      deleteUser(storedocs[index]['id']);
-                    }
+                    );
                   },
                 ),
-              );
-            },
+              ),
+            ],
           );
         },
       ),
-       floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
@@ -136,14 +152,10 @@ class _CustomerScreenState extends State<CustomerScreen> {
         backgroundColor: Colors.indigoAccent,
         foregroundColor: Colors.white,
         child: Icon(Icons.add),
-          shape: RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(50.0), // Ajustez la valeur selon votre préférence
         ),
       ),
-      
     );
-    
   }
-
-  
 }

@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:stock_medical/auth/signin_screen.dart';
 import 'package:stock_medical/screens/home_screen.dart';
-import 'package:stock_medical/screens/signin_screen.dart'; 
 void main() {
   runApp(MyApp());
 }
@@ -38,7 +38,7 @@ class AuthWrapper extends StatelessWidget {
             return HomeScreen();
           } else {
             // Utilisateur non connecté, naviguer vers l'écran de connexion (LoginScreen)
-            return LoginScreen();
+            return login();
           }
         }
       },
